@@ -14,7 +14,7 @@ function approach(argument0, argument1, argument2)
 	}
 }
 
-function normalize(value, min, max)
+function normalize_value(value, min, max)
 {
 	var normalized = (value - min) / (max - min);
 	normalized = clamp(normalized, 0, 1);

@@ -14,18 +14,8 @@ log(ds_list_size(collisions));
 
 
 
-if (keyboard_check_pressed(ord("E")))
-{
-	if (ds_list_size(collisions) > 0)
-	{
-		instance_destroy(collisions[| irandom(ds_list_size(collisions) - 1)]);
-	}
-}
 
-if (gridMeeting(gridPos.x, gridPos.y, objBlock))
-{
-	show("there is a block a pixel away");
-}
+
 
 
 

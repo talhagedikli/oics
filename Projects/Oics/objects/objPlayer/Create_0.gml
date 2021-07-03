@@ -36,9 +36,8 @@ area = [
 	[0, 1], [0, 2], [0, -1],
 	[1, 0], [2, 0], 
 	[-1, 0]
-
 ];
-distance	= [];
+//distance	= [];
 collisions	= ds_list_create();
 
 //control point variables
@@ -47,8 +46,8 @@ onWall		= false;
 onCeiling	= false;
 isTouching	= false;
 
-gridPos = new Vector2(x div GRID_W, y div GRID_H);
-aGridPos = new Vector2(gridPos.x * GRID_W, gridPos.y * GRID_H);
+gridPos 	= new Vector2(x div GRID_W, y div GRID_H);
+aGridPos	= new Vector2(gridPos.x * GRID_W, gridPos.y * GRID_H);
 
 #region Functions --------------------------------------------------------------
 checkCollisions = function()
@@ -72,41 +71,15 @@ snapPosition	= function()
 	}
 }
 
-findGridPos 	= function()
-{
-	gridPos.x = x div GRID_W;
-	gridPos.y = y div GRID_H;
-}
-
-findAGridPos	= function()
-{
-	aGridPos.x = gridPos.x * GRID_W;
-	aGridPos.y = gridPos.y * GRID_H;
-}
-
-drawGrid		= function(_pos, _arr)
-{
-	static gm = 4;
-	var i = 0; repeat(array_length(_arr))
-	{
-		var xp = _pos.x * GRID_W;
-		var yp = _pos.y * GRID_H;
-		var xg = _arr[i][0] * GRID_W;
-		var yg = _arr[i][1] * GRID_H;
-		CleanCapsule(xp + gm + xg, yp + gm + yg, xp - gm + GRID_W + xg, yp - gm + GRID_H + yg, true).Blend(c_white, 0.8).Rounding(4).Draw();
-		i++;
-	}
-}
-
-findDistance	= function(_pos, _area)
-{
-	var i = 0; repeat(array_length(_area))
-	{
-		distance[i][0] = _pos.x + _area[i][0];
-		distance[i][1] = _pos.y + _area[i][1];
-		i++;
-	}
-}
+//findDistance	= function(_pos, _area)
+//{
+//	var i = 0; repeat(array_length(_area))
+//	{
+//		distance[i][0] = _pos.x + _area[i][0];
+//		distance[i][1] = _pos.y + _area[i][1];
+//		i++;
+//	}
+//}
 
 checkGrid		= function(_target) // free
 {
@@ -114,7 +87,7 @@ checkGrid		= function(_target) // free
 	{
 		var i = 0; repeat(array_length(other.distance))
 		{
-			if (other.distance[i][0] == self.gridPos.x && other.distance[i][1] == self.gridPos.y) 
+			if (other.distance[i].x == self.gridPos.x && other.distance[i].y == self.gridPos.y) 
 			{
 				return self;
 				break;
@@ -125,10 +98,11 @@ checkGrid		= function(_target) // free
 	return noone;
 }
 
-gridList		= function(_dist, _object, _pos = undefined, _arr = undefined, _list = undefined)
+gridList		= function(_dist, _object, _pos = undefined, _arr = undefined)
 {
 	static gm		= 1;
 	static bl		= noone;
+	static _list	= ds_list_create();
 	// ds_list_clear(_list);	created auto list !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	if (!ds_exists(_list, ds_type_list))
 	{
@@ -141,10 +115,10 @@ gridList		= function(_dist, _object, _pos = undefined, _arr = undefined, _list =
 	}
 	var i = 0; repeat(array_length(_dist))
 	{
-		var x1 = _dist[i][0];
-		var x2 = _dist[i][0] + 1;
-		var y1 = _dist[i][1];
-		var y2 = _dist[i][1] + 1;
+		var x1 = _dist[i].x;
+		var x2 = _dist[i].x + 1;
+		var y1 = _dist[i].y;
+		var y2 = _dist[i].y + 1;
 		var safe = true;
 		bl		= collision_line(x1 * GRID_W + gm, y1 * GRID_H + gm, x2 * GRID_W - gm, y2 * GRID_H - gm, _object, false, true);
 		var j = 0; repeat(ds_list_size(_list))
@@ -168,11 +142,17 @@ gridList		= function(_dist, _object, _pos = undefined, _arr = undefined, _list =
 
 gridMeeting 	= function(_x, _y, _obj)
 {
-	if (_x == _obj.gridPos.x && _y == _obj.gridPos.y)
-	{
-		return true;
+	if (instance_exists(_obj))
+	{	
+		with (_obj)
+		{
+			if (_x == gridPos.x && _y == gridPos.y)
+			{
+				return true;
+			}		
+		}
 	}
-	return false;
+		return false;
 }
 
 gridPlace		= function(_x, _y, _obj)
@@ -187,7 +167,29 @@ gridPlace		= function(_x, _y, _obj)
 	return noone;
 }
 
+// Distance with structs
+distance = array_create(array_length(area));
+findDistance	   = function(_pos, _area)
+{
+    var i = 0; repeat(array_length(_area))
+    {
+		if (array_length(distance) != array_length(_area))
+		{
+			array_resize(distance, array_length(_area));
+		}
+        if (!is_struct(distance[i]))
+        {
+            distance[i] = new Grid(_pos.x + _area[i][0], _pos.y + _area[i][1]);
+        }
+        else
+        {
+            distance[i].set(_pos.x + _area[i][0], _pos.y + _area[i][1]);
+        }
+        i++;
+    }
+}
 
+#endregion
 #endregion //-------------------------------------------------------------------
 #region State ------------------------------------------------------------------
 state = new SnowState("idle");
@@ -203,9 +205,12 @@ state.add("idle", {
 	enter: function() 
 	{
 		snapPosition();
-		findGridPos();
+		gridPos.set(x div GRID_W, y div GRID_H);
 		findDistance(gridPos, area);
+		findDistance(gridPos, area);
+		
 		collisions = gridList(distance, objBlock);
+
 	},
 	step: function()
 	{
@@ -217,18 +222,28 @@ state.add("idle", {
 		{
 			moveDur = approach(moveDur, moveDurMax, 8);
 		}
-		
+		if (keyboard_check_pressed(ord("E")))
+		{
+			if (ds_list_size(collisions) > 0)
+			{
+				var bl = collisions[| irandom_range(0, ds_list_size(collisions) - 1)];
+				if (instance_exists(bl))
+				bl.fadeOut = true;
+				//instance_destroy(collisions[| irandom_range(0, ds_list_size(collisions) - 1)]);
+				collisions = gridList(distance, objBlock);
+			}
+		}
 		
 		
 		#region Switch state
-		if (abs(InputManager.horizontalInput))
+		if (abs(InputManager.horizontalInput) && !gridMeeting(gridPos.x + InputManager.horizontalInput, gridPos.y, objBlock))
 		{
 			moveDir.find(InputManager.horizontalInput, 0);
 			lastPos.x = x;
 			lastPos.y = y;
 			state.change("move")
 		}
-		else if (abs(InputManager.verticalInput))
+		else if (abs(InputManager.verticalInput) && !gridMeeting(gridPos.x, gridPos.y + InputManager.verticalInput, objBlock))
 		{
 			moveDir.find(0, InputManager.verticalInput);
 			lastPos.x = x;
@@ -251,7 +266,7 @@ state.add("move", {
 	{
 		x = flerp(x, lastPos.x + lengthdir_x(GRID_W, moveDir.angle), moveTween.value);
 		y = flerp(y, lastPos.y + lengthdir_y(GRID_H, moveDir.angle), moveTween.value);
-		if (moveTween.done || place_meeting(x, y, objBlock))
+		if (moveTween.done)
 		{
 			moveTween.stop();
 			state.change("idle");
