@@ -1,4 +1,4 @@
-#region CREATE -----------------------------------------------------------------
+#region Create -----------------------------------------------------------------
 //animation
 animation_init();
 //speed variables
@@ -47,7 +47,10 @@ onWall		= false;
 onCeiling	= false;
 isTouching	= false;
 
-// Functions -------------------------------------------------------------------
+gridPos = new Vector2(x div GRID_W, y div GRID_H);
+aGridPos = new Vector2(gridPos.x * GRID_W, gridPos.y * GRID_H);
+
+#region Functions --------------------------------------------------------------
 checkCollisions = function()
 {
 	onGround	= place_meeting(x, y + 1, objBlock);
@@ -56,7 +59,7 @@ checkCollisions = function()
 	isTouching	= onGround || onWall || onCeiling;
 }	
 
-snapPosition = function()
+snapPosition	= function()
 {
 	var _tlx	= x - sprite_xoffset;
 	var _tly	= y - sprite_yoffset;
@@ -69,23 +72,19 @@ snapPosition = function()
 	}
 }
 
-gridPos = new Vector2(x div GRID_W, y div GRID_H);
-
-aGridPos = new Vector2(gridPos.x * GRID_W, gridPos.y * GRID_H);
-
-findGridPos = function()
+findGridPos 	= function()
 {
 	gridPos.x = x div GRID_W;
 	gridPos.y = y div GRID_H;
 }
 
-findAGridPos = function()
+findAGridPos	= function()
 {
 	aGridPos.x = gridPos.x * GRID_W;
 	aGridPos.y = gridPos.y * GRID_H;
 }
 
-drawGrid = function(_pos, _arr)
+drawGrid		= function(_pos, _arr)
 {
 	static gm = 4;
 	var i = 0; repeat(array_length(_arr))
@@ -99,7 +98,7 @@ drawGrid = function(_pos, _arr)
 	}
 }
 
-findDistance = function(_pos, _area)
+findDistance	= function(_pos, _area)
 {
 	var i = 0; repeat(array_length(_area))
 	{
@@ -109,7 +108,7 @@ findDistance = function(_pos, _area)
 	}
 }
 
-checkGrid = function(_target)
+checkGrid		= function(_target) // free
 {
 	with (_target)
 	{
@@ -126,50 +125,20 @@ checkGrid = function(_target)
 	return noone;
 }
 
-checkGridV2 = function(_dist, _object, _pos = undefined, _arr = undefined, _list = collisions)
+gridList		= function(_dist, _object, _pos = undefined, _arr = undefined, _list = undefined)
 {
-	//var _pos	= gridPos;
-	//var _arr	= area;
-	//static gm		= 4;
-	//static bl		= noone;
-	//ds_list_clear(_list);
-	//var i = 0; repeat(array_length(_arr))
-	//{
-	//	var xp = _pos.x * GRID_W;
-	//	var yp = _pos.y * GRID_H;
-	//	var xg = _arr[i][0] * GRID_W;
-	//	var yg = _arr[i][1] * GRID_H;
-	//	var safe = true;
-	//	bl		= collision_line(xp + gm + xg, yp + gm + yg, xp - gm + GRID_W + xg, yp - gm + GRID_H + yg, objBlock, false, true);
-	//	var j = 0; repeat(ds_list_size(_list))
-	//	{
-	//		if (ds_list_find_value(_list, j) == bl)
-	//		{
-	//			safe = false;
-	//		}
-	//		j++;
-	//	}
-	//	if (safe)
-	//	{
-	//		collision_line_list(xp + gm + xg, yp + gm + yg, xp - gm + GRID_W + xg, yp - gm + GRID_H + yg, objBlock, false, true, _list, false);
-	//	}
-	//	i++;
-		
-	//}
-	//return _list;
-
 	static gm		= 1;
 	static bl		= noone;
-	//if (!ds_exists(_list, ds_type_list))
-	//{
-	//	var _list = ds_list_create();
-	//	show("created");
-	//}
-	//else
-	//{
-	//	ds_list_clear(_list);
-	//}
-	ds_list_clear(_list);
+	// ds_list_clear(_list);	created auto list !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	if (!ds_exists(_list, ds_type_list))
+	{
+		_list = ds_list_create();
+		show("created list");
+	}
+	else
+	{
+		ds_list_clear(_list);
+	}
 	var i = 0; repeat(array_length(_dist))
 	{
 		var x1 = _dist[i][0];
@@ -197,8 +166,30 @@ checkGridV2 = function(_dist, _object, _pos = undefined, _arr = undefined, _list
 	
 }
 
+gridMeeting 	= function(_x, _y, _obj)
+{
+	if (_x == _obj.gridPos.x && _y == _obj.gridPos.y)
+	{
+		return true;
+	}
+	return false;
+}
+
+gridPlace		= function(_x, _y, _obj)
+{
+	with (_obj)
+	{
+		if (_x == _obj.gridPos.x && _y == _obj.gridPos.y)
+		{
+			return self;
+		}		
+	}
+	return noone;
+}
+
+
 #endregion //-------------------------------------------------------------------
-#region STATE ------------------------------------------------------------------
+#region State ------------------------------------------------------------------
 state = new SnowState("idle");
 
 state.history_enable();
@@ -214,7 +205,7 @@ state.add("idle", {
 		snapPosition();
 		findGridPos();
 		findDistance(gridPos, area);
-		collisions = checkGridV2(distance, objBlock);
+		collisions = gridList(distance, objBlock);
 	},
 	step: function()
 	{
@@ -229,7 +220,7 @@ state.add("idle", {
 		
 		
 		
-		#region SWITCHNG
+		#region Switch state
 		if (abs(InputManager.horizontalInput))
 		{
 			moveDir.find(InputManager.horizontalInput, 0);
@@ -255,14 +246,12 @@ state.add("move", {
 	{
 		moveTween.start(0, 1, moveDur);
 		moveTimer.start(moveDur);
-		
-		
 	},
 	step: function() 
 	{
 		x = flerp(x, lastPos.x + lengthdir_x(GRID_W, moveDir.angle), moveTween.value);
 		y = flerp(y, lastPos.y + lengthdir_y(GRID_H, moveDir.angle), moveTween.value);
-		if (moveTween.done)
+		if (moveTween.done || place_meeting(x, y, objBlock))
 		{
 			moveTween.stop();
 			state.change("idle");

@@ -22,8 +22,10 @@ if (keyboard_check_pressed(ord("E")))
 	}
 }
 
-
-
+if (gridMeeting(gridPos.x, gridPos.y, objBlock))
+{
+	show("there is a block a pixel away");
+}
 
 
 
