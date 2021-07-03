@@ -109,20 +109,6 @@ findDistance = function(_pos, _area)
 	}
 }
 
-//checkGrid = function(_distance, _target)
-//{
-//	var i = 0; repeat(array_length(_distance))
-//	{
-//		if (_distance[i][0] == _target.x && _distance[i][1] == _target.y) 
-//		{
-//			return true;
-//			break;
-//		}
-//		i++;
-//	}
-//	return false;
-//}
-
 checkGrid = function(_target)
 {
 	with (_target)
@@ -140,6 +126,76 @@ checkGrid = function(_target)
 	return noone;
 }
 
+checkGridV2 = function(_dist, _object, _pos = undefined, _arr = undefined, _list = collisions)
+{
+	//var _pos	= gridPos;
+	//var _arr	= area;
+	//static gm		= 4;
+	//static bl		= noone;
+	//ds_list_clear(_list);
+	//var i = 0; repeat(array_length(_arr))
+	//{
+	//	var xp = _pos.x * GRID_W;
+	//	var yp = _pos.y * GRID_H;
+	//	var xg = _arr[i][0] * GRID_W;
+	//	var yg = _arr[i][1] * GRID_H;
+	//	var safe = true;
+	//	bl		= collision_line(xp + gm + xg, yp + gm + yg, xp - gm + GRID_W + xg, yp - gm + GRID_H + yg, objBlock, false, true);
+	//	var j = 0; repeat(ds_list_size(_list))
+	//	{
+	//		if (ds_list_find_value(_list, j) == bl)
+	//		{
+	//			safe = false;
+	//		}
+	//		j++;
+	//	}
+	//	if (safe)
+	//	{
+	//		collision_line_list(xp + gm + xg, yp + gm + yg, xp - gm + GRID_W + xg, yp - gm + GRID_H + yg, objBlock, false, true, _list, false);
+	//	}
+	//	i++;
+		
+	//}
+	//return _list;
+
+	static gm		= 1;
+	static bl		= noone;
+	//if (!ds_exists(_list, ds_type_list))
+	//{
+	//	var _list = ds_list_create();
+	//	show("created");
+	//}
+	//else
+	//{
+	//	ds_list_clear(_list);
+	//}
+	ds_list_clear(_list);
+	var i = 0; repeat(array_length(_dist))
+	{
+		var x1 = _dist[i][0];
+		var x2 = _dist[i][0] + 1;
+		var y1 = _dist[i][1];
+		var y2 = _dist[i][1] + 1;
+		var safe = true;
+		bl		= collision_line(x1 * GRID_W + gm, y1 * GRID_H + gm, x2 * GRID_W - gm, y2 * GRID_H - gm, _object, false, true);
+		var j = 0; repeat(ds_list_size(_list))
+		{
+			if (ds_list_find_value(_list, j) == bl)
+			{
+				safe = false;
+			}
+			j++;
+		}
+		if (safe)
+		{
+			collision_line_list(x1 * GRID_W + gm, y1 * GRID_H + gm, x2 * GRID_W - gm, y2 * GRID_H - gm, _object, false, true, _list, false);
+		}
+		i++;
+		
+	}
+	return _list;
+	
+}
 
 #endregion //-------------------------------------------------------------------
 #region STATE ------------------------------------------------------------------
@@ -151,9 +207,15 @@ state.event_set_default_function("init", function() {
 		x = clamp(x, 0, room_width);
 		y = clamp(y, 0, room_height);
 });
-	
+
 state.add("idle", {
-	enter: function() {},
+	enter: function() 
+	{
+		snapPosition();
+		findGridPos();
+		findDistance(gridPos, area);
+		collisions = checkGridV2(distance, objBlock);
+	},
 	step: function()
 	{
 		if  (abs(InputManager.horizontalInput) || abs(InputManager.verticalInput))
@@ -164,23 +226,10 @@ state.add("idle", {
 		{
 			moveDur = approach(moveDur, moveDurMax, 8);
 		}
-		snapPosition();
-		findGridPos();
-		findDistance(gridPos, area);
-		var blk = checkGrid(objBlock);
-		//if (blk != noone)
-		//{
-		//	instance_destroy(blk);
-		//}
+		
+		
 		
 		#region SWITCHNG
-		// if (abs(InputManager.horizontalInput) || abs(InputManager.verticalInput))
-		// {
-		// 	moveDir.find(InputManager.horizontalInput, InputManager.verticalInput);
-		// 	lastPos.x = x;
-		// 	lastPos.y = y;
-		// 	state.change("move")
-		// }
 		if (abs(InputManager.horizontalInput))
 		{
 			moveDir.find(InputManager.horizontalInput, 0);

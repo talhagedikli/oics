@@ -9,5 +9,4 @@
 draw_self();
 //shader_reset();
 
-draw_text(x, y, gridPos);
 
