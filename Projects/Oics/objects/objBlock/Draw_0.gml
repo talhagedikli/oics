@@ -7,6 +7,8 @@
 
 
 draw_self();
+draw_text(x, y, image_xscale);
+draw_text(x, y + 15, image_yscale);
 //shader_reset();
 
 

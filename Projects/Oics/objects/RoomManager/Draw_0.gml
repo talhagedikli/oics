@@ -8,3 +8,6 @@
 //		i++;
 //	}
 //}
+
+draw_rectangle(testGr.x * GRID_W, testGr.y * GRID_H, (testGr.x + testGr.xScale) * GRID_W, 
+				(testGr.y + testGr.yScale) * GRID_H, false);

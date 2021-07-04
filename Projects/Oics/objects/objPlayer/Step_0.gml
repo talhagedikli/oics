@@ -10,13 +10,3 @@ check_collisions_pixel_perfect();
 xPos = x;
 yPos = y;
 
-log(ds_list_size(collisions));
-
-
-
-
-
-
-
-
- 

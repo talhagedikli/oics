@@ -19,6 +19,8 @@ grid = [
 	[ [] ]
 ];
 
+testGr = new Grid(5, 7, c_baby_blue, 0.8, 2, 5);
+
 createGrid = function()
 {
 	var i = 0; repeat(room_width div 32)
@@ -63,6 +65,7 @@ state
 		//	bl.image_xscale = irandom_range(1, 4);
 		//	bl.image_yscale = irandom_range(1, 4);
 		//
+		
 		createGrid();
 	},
 	step: function()
