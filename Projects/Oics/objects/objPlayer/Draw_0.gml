@@ -17,7 +17,7 @@ var i	= 0; repeat(array_length(distance))
 	y2 = distance[i].y + 1;
 	var gr = distance[i];
 	
-	if (gridMeeting(gr.x, gr.y, objBlock))
+	if (gridMeeting(gr.x, gr.y, objSolidParent))
 	{
 		tc = C_CRIMSON;
 		ta	= 1;
@@ -26,7 +26,12 @@ var i	= 0; repeat(array_length(distance))
 	{
 		tc = c_white;
 		ta = 0.8;
-	}	
+	}
+	//var type = gridPlace(gr.x, gr.y, objSolidParent);
+	//if (type == objBlock)
+	//{
+	//	show("block");
+	//}
 	gr.blend(merge_color(gr.color, tc, 0.1), approach(gr.alpha, ta, 0.1));
 	CleanRectangle(x1 * GRID_W + gm, y1 * GRID_H + gm, x2 * GRID_W - gm, y2 * GRID_H - gm).Blend(gr.color, gr.alpha).Border(2, c_white, 0.8).Rounding(4).Draw();
 	i++;

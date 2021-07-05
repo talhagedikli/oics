@@ -35,7 +35,7 @@
     "path": "folders/Objects.yy",
   },
   "resourceVersion": "1.0",
-  "name": "objBlock",
+  "name": "objWall",
   "tags": [],
   "resourceType": "GMObject",
 }

@@ -117,7 +117,7 @@ findDistance	   = function(_pos, _area)
         i++;
     }
 }
-
+findDistance(gridPos, area);
 // Distance with structs2
 area2 = [
 	[1, 2],	// Right (y = 0)
@@ -320,7 +320,8 @@ state = new SnowState("idle");
 
 state.history_enable();
 state.set_history_max_size(15);
-state.event_set_default_function("init", function() {
+state.event_set_default_function("init", function() 
+{
 		x = clamp(x, 0, room_width);
 		y = clamp(y, 0, room_height);
 });
@@ -353,14 +354,14 @@ state.add("idle", {
 		}
 		
 		#region Switch state
-		if (abs(InputManager.horizontalInput) && !gridMeeting(gridPos.x + InputManager.horizontalInput, gridPos.y, objBlock))
+		if (abs(InputManager.horizontalInput) && !gridMeeting(gridPos.x + InputManager.horizontalInput, gridPos.y, objSolidParent))
 		{
 			moveDir.find(InputManager.horizontalInput, 0);
 			lastPos.x = x;
 			lastPos.y = y;
 			state.change("move")
 		}
-		else if (abs(InputManager.verticalInput) && !gridMeeting(gridPos.x, gridPos.y + InputManager.verticalInput, objBlock))
+		else if (abs(InputManager.verticalInput) && !gridMeeting(gridPos.x, gridPos.y + InputManager.verticalInput, objSolidParent))
 		{
 			moveDir.find(0, InputManager.verticalInput);
 			lastPos.x = x;
