@@ -33,18 +33,57 @@ crouchDecel 	= 0.075;
 
 
 area = [
-	[0, 1], 
+	[0, 1],
+	[0, 2],
 	[0, -1],
 	[1, 0], 
 	[-1, 0]
 ];
 
-area2 = [
-	[1], // Right (y = 0)
-	[1],// Up (x = 0)
-	[1], // Left (y = 0)
-	[1] // Down (x = 0)
-];
+
+
+dirfind 		= function(_area)
+{
+	var r, u, l, d;
+	r = array_create(0);
+	u = array_create(0);
+	l = array_create(0);
+	d = array_create(0);
+	var resize = array_create(4, 0);
+	var i = 0; repeat(array_length(_area))
+	{
+		var _x = _area[i][0];
+		var _y = _area[i][1];
+		if (_x >= 0 && _y == 0)
+		{
+			resize[0]++;
+			array_resize(r, resize[0]);
+			r[resize[0] - 1] = _x;
+		}
+		else if (_x = 0 && _y <= 0)
+		{
+			resize[1]++;
+			array_resize(u, resize[1]);
+			u[resize[1] - 1] = _y;
+		}	
+		else if (_x <= 0 && _y == 0)
+		{
+			resize[2]++;
+			array_resize(l, resize[2]);
+			l[resize[2] - 1] = _x;
+		}
+		else if (_x == 0 && _y >= 0)
+		{
+			resize[3]++;
+			array_resize(d, resize[3]);
+			d[resize[3] - 1] = _y;
+		}
+		i++;
+	}
+	return [r, u, l, d];
+}
+
+//show(dirfind(area));
 
 distance	= array_create(array_length(area));
 collisions	= ds_list_create();
@@ -78,31 +117,43 @@ findDistance	   = function(_pos, _area)
         i++;
     }
 }
-// Distance with structs
+
+// Distance with structs2
+area2 = [
+	[1, 2],	// Right (y = 0)
+	[-1],	// Up (x = 0)
+	[-1],	// Left (y = 0)
+	[1]	// Down (x = 0)
+];
+distance2 = [];
 findDistance2	   = function(_pos, _area)
 {
+	var index	= 0;
+	var len 	= 1;
     var i = 0; repeat(array_length(_area))
     {
-		var arr = _area[i];
-		
-		if (array_length(distance) != array_length(_area))
+		var j = 0; repeat(array_length(_area[i]))
 		{
-			array_resize(distance, array_length(_area));
-		}
-        if (!is_struct(distance[i]))
-        {
-            distance[i] = new Grid(_pos.x + i mod 2 == 0 ? _area[i][j] : 0, _pos.y + i mod 2 == 0 ? 0 : _area[i][j]);
-        }
-		
-		var j = 0; repeat(array_length(arr))
-		{
-			distance[i * j + j + i].set(_pos.x + i mod 2 == 0 ? _area[i][j] : 0, _pos.y + i mod 2 == 0 ? 0 : _area[i][j]);
+			array_resize(distance2, len);
+			var _x = (i mod 2 == 0 ? _area[i][j] : 0);
+			var _y = (i mod 2 == 0 ? 0 : _area[i][j]);
+	        if (!is_struct(distance2[index]))
+	        {
+	            distance2[index] = new Grid(_pos.x + _x, _pos.y + _y);
+	        }
+	        else
+	        {
+				distance2[index].set(_pos.x + _x, _pos.y + _y);
+			}
+			
 			j++;
+			len++;
+			index++;
 		}
-        
         i++;
     }
 }
+
 
 checkCollisions = function()
 {
@@ -125,29 +176,11 @@ snapPosition	= function()
 	}
 }
 
-checkGrid		= function(_target) // free
-{
-	with (_target)
-	{
-		var i = 0; repeat(array_length(other.distance))
-		{
-			if (other.distance[i].x == self.gridPos.x && other.distance[i].y == self.gridPos.y) 
-			{
-				return self;
-				break;
-			}
-			i++;
-		}
-	}
-	return noone;
-}
-
 gridList		= function(_dist, _object, _pos = undefined, _arr = undefined)
 {
 	static gm		= 1;
 	static bl		= noone;
 	static _list	= ds_list_create();
-	// ds_list_clear(_list);	created auto list !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	if (!ds_exists(_list, ds_type_list))
 	{
 		_list = ds_list_create();
@@ -203,6 +236,35 @@ gridPlace		= function(_x, _y, _obj)
 	return noone;
 }
 
+distanceMeeting	= function(_dist = distance, _obj)
+{
+	var i = 0; repeat(array_length(_dist))
+	{
+		var bl = gridPlace(_dist[i].x, _dist[i].y, _obj);
+		if(bl != noone)
+		{
+			return true;
+		}
+		i++;
+	}
+	return false;
+}
+
+distancePlace	= function(_dist = distance, _obj)
+{
+	var i = 0; repeat(array_length(_dist))
+	{
+		var bl = gridPlace(_dist[i].x, _dist[i].y, _obj);
+		if(bl != noone)
+		{
+			return bl;
+		}
+		i++;
+	}
+	return noone;
+}
+		
+
 structMeeting	= function(_x, _y, _obj)
 {
 	if (is_struct(_obj))
@@ -251,7 +313,7 @@ structPlace		= function(_x, _y, _obj)
 	return noone;
 }
 
-#endregion
+#endregion //-------------------------------------------------------------------
 #endregion //-------------------------------------------------------------------
 #region State ------------------------------------------------------------------
 state = new SnowState("idle");
@@ -269,6 +331,7 @@ state.add("idle", {
 		snapPosition();
 		gridPos.set(x div GRID_W, y div GRID_H);
 		findDistance(gridPos, area);
+		findDistance2(gridPos, area2);
 		collisions = gridList(distance, objBlock);
 
 	},
@@ -285,20 +348,8 @@ state.add("idle", {
 		
 		if (keyboard_check_pressed(ord("E")))
 		{
-			var i = 0; repeat (array_length(distance))
-			{
-				var bl = gridPlace(distance[i].x, distance[i].y, objBlock);
-				i++;
-			}
-			
-			if bl =! noone
-				bl.fadeOut = true;
-			//if (ds_list_size(collisions) > 0)
-			//{
-			//	var bl = collisions[| ds_list_size(collisions) - 1];
-			//	if (instance_exists(bl)) bl.fadeOut = true;
-			//	collisions = gridList(distance, objBlock);
-			//}
+			var bl = distancePlace(distance, objBlock);
+			if instance_exists(bl) bl.fadeOut = true;
 		}
 		
 		#region Switch state

@@ -17,25 +17,6 @@ var i	= 0; repeat(array_length(distance))
 	y2 = distance[i].y + 1;
 	var gr = distance[i];
 	
-	
-	//var j = 0; repeat(ds_list_size(collisions))
-	//{
-	//	if (instance_exists(collisions[| j]))
-	//	{
-	//		if (collisions[| j].gridPos.x == x1) && (collisions[| j].gridPos.y == y1)
-	//		{
-	//			tc = C_CRIMSON;
-	//			ta	= 1;
-	//			break;
-	//		}
-	//		else 
-	//		{
-	//			tc = c_white;
-	//			ta	= 0.8;
-	//		}
-	//	}
-	//	j++;
-	//}
 	if (gridMeeting(gr.x, gr.y, objBlock))
 	{
 		tc = C_CRIMSON;

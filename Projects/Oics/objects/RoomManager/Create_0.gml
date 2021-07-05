@@ -19,7 +19,6 @@ grid = [
 	[ [] ]
 ];
 
-testGr = new Grid(5, 7, c_baby_blue, 0.8, 2, 5);
 
 createGrid = function()
 {
