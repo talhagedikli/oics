@@ -135,51 +135,43 @@
 //	data	= [];
 //}
 
-function Signal(_signal) constructor
+function __signalStruct(_signal, _owner) constructor
 {
-	signal	= "";
-	owner	= noone;
-	data	= [];
-	if !is_array(global.signals[$ string(signal)]) 
+	__signal	= _signal;
+	__owner		= _owner;
+	__data		= [];
+	if !is_array(global.signals[$ string(__signal)]) 
 	{
-		global.signals[$ string(signal)] = array_create(0);
+		global.signals[$ string(__signal)] = array_create(0);
 	}
-	array	= global.signals[$ string(signal)];
+	__array		= global.signals[$ string(__signal)];
 			
-	static Push = function()
+	static __push = function()
 	{
-
 		var i = 0; repeat (argument_count) 
 		{
-			data[i] = argument[i];
+			__data[i] = argument[i];
 			i++;
 		}
 		
-		global.signals[$ string(signal)] = data;
-		array	= global.signals[$ string(signal)];
+		global.signals[$ string(__signal)] = __data;
+		__array	= global.signals[$ string(__signal)];
 		return self;
 	}
 	
 }
 
-function signal_create(_signal)
+function signal_join(_signal, _owner, _data)
 {
-	var s	 = new Signal(_signal);
-	s.signal = _signal;
-	s.owner  = self;
-	return s;
-}
-
-function signal_find(_signal, _owner, _func = function() {})
-{
-	var strSignal = {};
-	var arrSignal = [];
-	if (instance_exists(_owner)) 
+	var sgn = global.signals[$ string(__signal)];
+	if (!is_struct(sgn))
 	{
-		strSignal = _owner[$ _signal];
+		sgn = new __signalStruct(_signal, _owner);
 	}
-	if (strSignal =! {}) arrSignal = strSignal.array;
-	script_execute_ext(method_get_index(_func), arrSignal);	
+	else
+	{
+		return self;
+	}
 }
 
 

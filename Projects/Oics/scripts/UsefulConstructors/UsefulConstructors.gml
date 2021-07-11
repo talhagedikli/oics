@@ -243,9 +243,21 @@ function Vector2(_x = undefined, _y = undefined) constructor
 		x /= _scalar;
 		y /= _scalar;
 	}
+	
+	static negate = function()
+	{
+		x = -x;
+		y = -y;
+	}
+	
+	static get_direction = function()
+	{
+		return point_direction(0, 0, x, y);
+	}
       
 	static get_magnitude = function() {
 		return sqrt((x * x) + (y *y));
+		//return point_distance(0, 0, x, y);
     }
 
 	static normalize = function() {
@@ -265,6 +277,12 @@ function Vector2(_x = undefined, _y = undefined) constructor
 		if (get_magnitude() > _limit) {
 			set_magnitude(_limit);
 		}
+	}
+	
+	static copy = function(_vector2)
+	{
+		x = _vector2.x;
+		y = _vector2.y;
 	}
 	
 }
