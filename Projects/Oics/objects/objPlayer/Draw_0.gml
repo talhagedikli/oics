@@ -27,6 +27,7 @@ var i	= 0; repeat(array_length(distance))
 		tc = c_white;
 		ta = 0.8;
 	}
+	
 	//var type = gridPlace(gr.x, gr.y, objSolidParent);
 	//if (type == objBlock)
 	//{
