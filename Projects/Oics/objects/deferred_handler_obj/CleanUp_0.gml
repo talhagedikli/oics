@@ -1,0 +1,1 @@
+ds_queue_destroy(deferred_requests);
