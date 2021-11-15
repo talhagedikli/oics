@@ -1,1 +1,0 @@
-ds_stack_destroy(function_stack);
